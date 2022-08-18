@@ -1,0 +1,40 @@
+{
+  "Griditems": [
+    {
+      "name": "Totem01",
+      "label": "Power Cell #1",
+      "status": "off",
+      "key": "1"
+    },
+  {
+      "name": "Totem02",
+      "label": "Power Cell #2",
+      "status": "off",
+      "key": "2"
+    },
+       {
+      "name": "Totem03",
+      "label": "Power Cell #3",
+      "status": "off",
+      "key": "3"
+    },
+  {
+      "name": "Totem04",
+      "label": "Power Cell #4",
+      "status": "off",
+      "key": "4"
+    },
+    {
+      "name": "Totem05",
+      "label": "Power Cell #5",
+      "status": "on",
+      "key": "5"
+    },
+  {
+      "name": "Totem06",
+      "label": "Power Cell #6",
+      "status": "on",
+      "key": "6"
+    }
+  ]
+}
