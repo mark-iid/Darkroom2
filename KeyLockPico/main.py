@@ -8,17 +8,19 @@ I2C_NUM_ROWS = 2 # number of rows in display
 I2C_NUM_COLS = 16 # number of columns in display
 
 MID = 1500000 # midpoint of servo motor
-MIN = 1000000 # minpoint of servo motor
-MAX = 2000000 # maxpoint of servo motor
+MIN = 400000 # minpoint of servo motor
+MAX = 2100000 # maxpoint of servo motor
 
 KEY_UP   = const(0) # key not pressed
 KEY_DOWN = const(1) # key pressed
-keys = [['1', '4', '7', '*'], ['2', '5', '8', '0'], ['3', '6', '9', '#'], ['A', 'B', 'C', 'D']] # key array
+keys = [['1', '4', '7', '*'], ['2', '5', '8', '0'], ['3', '6', '9', '#'], 
+['A', 'B', 'C', 'D']] # key array
 
 rows = [8,9,10,11] # key row gpio pins
 cols = [12,13,15,16] # key columm gpio pins
 row_pins = [Pin(pin_name, mode=Pin.OUT) for pin_name in rows] 
-col_pins = [Pin(pin_name, mode=Pin.IN, pull=Pin.PULL_DOWN) for pin_name in cols]
+col_pins = [Pin(pin_name, mode=Pin.IN, pull=Pin.PULL_DOWN) for pin_name in 
+cols]
 
 # keypress timer poller
 timer_keys = Timer()
@@ -33,7 +35,7 @@ pwm.freq(50)
 pwm.duty_ns(MIN)
 
 # initial password settings
-passcode = "1234" 
+passcode = "" 
 entered_passcode = ""
 
 # Initialize keypad
@@ -75,13 +77,33 @@ def PollKeypad(timer):
 def keypadlock_main():
     InitKeypad()
     global entered_passcode
+    global passcode
     print("Running keypadlock_main")
-    lcd.putstr("Enter Keycode")
-    lcd.move_to(0,1)
-    lcd.show_cursor()
-    lcd.blink_cursor_on()
-    timer_keys.init(freq=2, mode=Timer.PERIODIC, callback=PollKeypad)
+    
+    timer_keys.init(freq=2, mode=Timer.PERIODIC, callback=PollKeypad) 
+
     while True:
+        if passcode == "":
+            pwm.duty_ns(MIN)
+            lcd.clear()
+            lcd.putstr("Create Keycode")
+            lcd.move_to(0,1)
+            lcd.show_cursor()
+            lcd.blink_cursor_on()
+            entered_passcode = ""
+            while len(entered_passcode) != 4:
+                lcd.blink_cursor_off()
+                lcd.blink_cursor_on()
+            passcode = entered_passcode
+            entered_passcode = ""
+            lcd.clear()
+            lcd.putstr("Code = " + passcode)
+            utime.sleep(2)
+        lcd.clear()
+        lcd.putstr("Enter Keycode")
+        lcd.move_to(0,1)
+        lcd.show_cursor()
+        lcd.blink_cursor_on()      
         while entered_passcode != passcode:
             if len(entered_passcode) > 3:
                 utime.sleep(1)
@@ -106,15 +128,8 @@ def keypadlock_main():
         while entered_passcode != 'D':
             if len(entered_passcode) > 1:
                 entered_passcode = ""
-        pwm.duty_ns(MIN)
-        lcd.clear()
-        lcd.putstr("Enter Keycode")
-        lcd.move_to(0,1)
-        lcd.show_cursor()
-        lcd.blink_cursor_on()
-        entered_passcode = ""
-        
-    
+        passcode = ""
+        pwm.duty_ns(MIN) 
     pwm.stop()
 
 if __name__ == "__main__":
