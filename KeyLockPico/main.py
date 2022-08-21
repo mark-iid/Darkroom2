@@ -8,8 +8,8 @@ I2C_NUM_ROWS = 2 # number of rows in display
 I2C_NUM_COLS = 16 # number of columns in display
 
 MID = 1500000 # midpoint of servo motor
-MIN = 400000 # minpoint of servo motor
-MAX = 2100000 # maxpoint of servo motor
+MIN = 600000 # minpoint of servo motor
+MAX = 1000000 # maxpoint of servo motor
 
 KEY_UP   = const(0) # key not pressed
 KEY_DOWN = const(1) # key pressed
@@ -69,6 +69,7 @@ def PollKeypad(timer):
                     lcd.blink_cursor_on()
                 else:
                     lcd.putchar(keys[row][col])
+                    print("pressed " + keys[row][col])
                     entered_passcode = entered_passcode + keys[row][col]
                     last_key_press = keys[row][col]
 
@@ -98,6 +99,7 @@ def keypadlock_main():
             entered_passcode = ""
             lcd.clear()
             lcd.putstr("Code = " + passcode)
+            print("passcode set = "+passcode)
             utime.sleep(2)
         lcd.clear()
         lcd.putstr("Enter Keycode")
