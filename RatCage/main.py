@@ -1,8 +1,8 @@
 from machine import I2C, Pin, PWM
 
 MID = 1500000 # midpoint of servo motor
-MIN = 400000 # minpoint of servo motor
-MAX = 2100000 # maxpoint of servo motor
+MIN = 700000 # minpoint of servo motor
+MAX = 1600000 # maxpoint of servo motor
 
 # servo motor setup
 pwm = PWM(Pin(2))
