@@ -16,9 +16,9 @@ import datetime
 power_current = 0  # current power
 powerTotal = 100  # total power needed
 power_target = 0  # power supplied by existing batteries
-minutes_until_failure = 1  # minutes until portal control failure
+minutes_until_failure = 15  # minutes until portal control failure
 portal_opening_time = 0  # time portal will open
-boot_up_text = True  # display portal control boot up text
+boot_up_text = False  # display portal control boot up text
 power_up_complete = False  # state of portal control unit
 battery_processor_device = "/dev/ttyACM0"  # battery processor device
 ending_music_played = False  # has the ending music played yet
@@ -84,6 +84,7 @@ def refresh(_loop, _data):
                 if item_list[0].status == GridItem.Status.OFF.value:
                     fanfare_sound.play()
                     item_list[0].status = GridItem.Status.ON.value
+                    serialPort.write(b"door\r\n")
             elif item_list[0].status == GridItem.Status.ON.value:
                 beeoo_sound.play()
                 item_list[0].status = GridItem.Status.OFF.value
@@ -224,6 +225,7 @@ def refresh(_loop, _data):
             sleep(1.5)
             victory_sound.play()
             ending_music_played = True
+        serialPort.write(b"bookcase\r\n")
     main_loop.set_alarm_in(0.01, refresh)
 
 
@@ -463,7 +465,7 @@ os.system('clear')
 
 # connect to battery processor
 serialPort = serial.Serial(battery_processor_device, 115200, timeout=0)
-
+serialPort.write(b"reset\r\n")
 
 # create main interface and start program loop
 main_loop = urwid.MainLoop(layout, palette, unhandled_input=handle_input)
