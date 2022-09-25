@@ -209,6 +209,5 @@ class LcdApi:
     # of hal_sleep_us in their hal layer and it will be used instead.
     def hal_sleep_us(self, usecs):
         """Sleep for some time (given in microseconds)."""
-        time.sleep_us(usecs)  # NOTE this is not part of Standard Python library, specific hal layers will 
-need to override this
+        time.sleep_us(usecs)  
 
