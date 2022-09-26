@@ -17,6 +17,10 @@ input_line3 = Pin(5, Pin.IN, Pin.PULL_DOWN)
 output_line4 = Pin(6, Pin.OUT)
 input_line4 = Pin(7, Pin.IN, Pin.PULL_DOWN)
 led.value(1)
+output_line_door = Pin(10, Pin.OUT)
+output_line_bookcase = Pin(11, Pin.OUT)
+output_line_door.value(0)
+output_line_bookcase.value(0)
 
 while True:
     mask = 0
@@ -37,4 +41,11 @@ while True:
         v = sys.stdin.readline().strip()
         if v.lower() == "getbytes":
             break
+        elif v.lower() == "door":
+            output_line_door.value(1)
+        elif v.lower() == "bookcase":
+            output_line_bookcase.value(1)
+        elif v.lower() == "reset":
+            output_line_bookcase.value(0)
+            output_line_door.value(0)
 
