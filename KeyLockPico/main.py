@@ -75,6 +75,7 @@ def PollKeypad(timer):
                     print("pressed " + keys[row][col])
                     entered_passcode = entered_passcode + keys[row][col]
                     last_key_press = keys[row][col]
+                    utime.sleep(0.2) # debounce
 
 
 # main loop
