@@ -16,7 +16,7 @@ import datetime
 power_current = 0  # current power
 powerTotal = 100  # total power needed
 power_target = 0  # power supplied by existing batteries
-minutes_until_failure = 15  # minutes until portal control failure
+minutes_until_failure = 20  # minutes until portal control failure
 portal_opening_time = 0  # time portal will open
 boot_up_text = False  # display portal control boot up text
 power_up_complete = False  # state of portal control unit
@@ -209,9 +209,9 @@ def refresh(_loop, _data):
         main_loop.screen.register_palette_entry('warning', 'light red', 'dark red')
         count_down_text.set_text("PORTAL CONTROL FAILURE!!! PORTAL OPENING!!! EVACUATE IMMEDIATELY! INVASION IMMINENT!")
         if not ending_music_played:
-            error_sound.play(loops=20)
-            error_sound.fadeout(10000)
-            sleep(1)
+            # error_sound.play(loops=20)
+            # error_sound.fadeout(10000)
+            # sleep(1)
             failure_sound.play()
             ending_music_played = True
         main_loop.screen.clear()
@@ -375,10 +375,10 @@ sec3_sound = pygame.mixer.Sound("resources/3sec.wav")
 sec2_sound = pygame.mixer.Sound("resources/2sec.wav")
 sec1_sound = pygame.mixer.Sound("resources/1sec.wav")
 winxp_sound = pygame.mixer.Sound("resources/erro-2.ogg")
-fanfare_sound = pygame.mixer.Sound("resources/fanfare.ogg")
-fanfare_sound.set_volume(0.7)
+fanfare_sound = pygame.mixer.Sound("resources/batteryplacement.wav")
+# fanfare_sound.set_volume(0.7)
 victory_sound = pygame.mixer.Sound("resources/victory.ogg")
-failure_sound = pygame.mixer.Sound("resources/metalgeargameov5235.ogg")
+failure_sound = pygame.mixer.Sound("resources/systemfailure.wav")
 winxp_sound.set_volume(0.8)
 if boot_up_text:
     startup_sound.play()
