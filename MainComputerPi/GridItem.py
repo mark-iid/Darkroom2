@@ -9,6 +9,7 @@ class Status(Enum):
 
 # battery config object
 class GridItem:
+
     def __init__(self, name, label, status, key):
         self.name = name
         self.label = label

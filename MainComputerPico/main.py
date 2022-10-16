@@ -4,10 +4,14 @@ import sys
 
 led = Pin(25, Pin.OUT)
 
+
+# Bit masked setting
 def set_bit(position, binary):
     bit_mask = 1 << position
     return bit_mask | binary
 
+
+# pin definition
 output_line1 = Pin(0, Pin.OUT)
 input_line1 = Pin(1, Pin.IN, Pin.PULL_DOWN)
 output_line2 = Pin(2, Pin.OUT)
@@ -25,16 +29,16 @@ output_line_bookcase.value(0)
 while True:
     mask = 0
     output_line1.value(1)
-    output_line2.value(1)    
-    output_line3.value(1)    
+    output_line2.value(1)
+    output_line3.value(1)
     output_line4.value(1)
-    if(input_line1.value()):
+    if (input_line1.value()):
         mask = set_bit(0, mask)
-    if(input_line2.value()):
+    if (input_line2.value()):
         mask = set_bit(1, mask)
-    if(input_line3.value()):
+    if (input_line3.value()):
         mask = set_bit(2, mask)
-    if(input_line4.value()):
+    if (input_line4.value()):
         mask = set_bit(3, mask)
     print(mask)
     while True:
@@ -48,4 +52,3 @@ while True:
         elif v.lower() == "reset":
             output_line_bookcase.value(0)
             output_line_door.value(0)
-

@@ -22,7 +22,7 @@ boot_up_text = True  # display portal control boot up text
 power_up_complete = False  # state of portal control unit
 battery_processor_device = "/dev/ttyACM0"  # battery processor device
 ending_music_played = False  # has the ending music played yet
-sec1_sound_played = False
+sec1_sound_played = False  # if various time specific audio files have played yet
 sec2_sound_played = False
 sec3_sound_played = False
 sec4_sound_played = False
@@ -37,21 +37,19 @@ min10_sound_played = False
 min15_sound_played = False
 
 # color pallet
-palette = [
-    ('titlebar', 'white, bold', 'light blue'),
-    ('headers', 'white,bold', 'dark blue'),
-    ('body', 'white', 'dark blue'),
-    ('on', 'yellow,bold', 'dark blue'),
-    ('off', 'light red', 'dark blue'),
-    ('regular', 'light gray', 'dark blue'),
-    ('red', 'light red', 'dark blue'),
-    ('redflash', 'dark red', 'dark blue'),
-    ('yellow', 'yellow', 'dark blue'),
-    ('lightbar', 'light blue', 'dark blue'),
-    ('darkbar', 'black', 'dark blue'),
-    ('normal', 'white', 'dark blue', 'standout'),
-    ('complete', 'white', 'light blue'),
-    ('warning', 'light gray', 'dark blue')]
+palette = [('titlebar', 'white, bold', 'light blue'),
+           ('headers', 'white,bold', 'dark blue'),
+           ('body', 'white', 'dark blue'), ('on', 'yellow,bold', 'dark blue'),
+           ('off', 'light red', 'dark blue'),
+           ('regular', 'light gray', 'dark blue'),
+           ('red', 'light red', 'dark blue'),
+           ('redflash', 'dark red', 'dark blue'),
+           ('yellow', 'yellow', 'dark blue'),
+           ('lightbar', 'light blue', 'dark blue'),
+           ('darkbar', 'black', 'dark blue'),
+           ('normal', 'white', 'dark blue', 'standout'),
+           ('complete', 'white', 'light blue'),
+           ('warning', 'light gray', 'dark blue')]
 
 
 # main refresh loop
@@ -68,8 +66,9 @@ def refresh(_loop, _data):
     global sec5_sound, sec4_sound, sec3_sound, sec2_sound, sec1_sound
     global sec5_sound_played, sec4_sound_played, sec3_sound_played, sec2_sound_played, sec1_sound_played
     global serialPort
-    if portal_opening_time == 0:
-        portal_opening_time = datetime.datetime.now() + datetime.timedelta(minutes=minutes_until_failure)
+    if portal_opening_time == 0:  # calculate portal opening time
+        portal_opening_time = datetime.datetime.now() + datetime.timedelta(
+            minutes=minutes_until_failure)
     main_loop.draw_screen()  # redraw screen
 
     if not power_up_complete:
@@ -80,36 +79,37 @@ def refresh(_loop, _data):
     if serialPort.inWaiting() > 0:  # if request results waiting
         serial_input = serialPort.readline().strip()  # read results
         if serial_input.isalnum():  # if is a number
-            if int(serial_input) & 1 == 1:
+            if int(serial_input) & 1 == 1:  # ff first battery inserted
                 if item_list[0].status == GridItem.Status.OFF.value:
                     fanfare_sound.play()
                     item_list[0].status = GridItem.Status.ON.value
-                    serialPort.write(b"door\r\n")
+                    serialPort.write(
+                        b"door\r\n"
+                    )  # open lab door on first battery insertion
             elif item_list[0].status == GridItem.Status.ON.value:
                 beeoo_sound.play()
                 item_list[0].status = GridItem.Status.OFF.value
-            if int(serial_input) & 2 == 2:
+            if int(serial_input) & 2 == 2:  # if second battery inserted
                 if item_list[1].status == GridItem.Status.OFF.value:
                     fanfare_sound.play()
                     item_list[1].status = GridItem.Status.ON.value
             elif item_list[1].status == GridItem.Status.ON.value:
                 beeoo_sound.play()
                 item_list[1].status = GridItem.Status.OFF.value
-            if int(serial_input) & 4 == 4:
+            if int(serial_input) & 4 == 4:  # ff third battery inserted
                 if item_list[2].status == GridItem.Status.OFF.value:
                     fanfare_sound.play()
                     item_list[2].status = GridItem.Status.ON.value
             elif item_list[2].status == GridItem.Status.ON.value:
                 beeoo_sound.play()
                 item_list[2].status = GridItem.Status.OFF.value
-            if int(serial_input) & 8 == 8:
+            if int(serial_input) & 8 == 8:  # if fourth battery inserted
                 if item_list[3].status == GridItem.Status.OFF.value:
                     fanfare_sound.play()
                     item_list[3].status = GridItem.Status.ON.value
             elif item_list[3].status == GridItem.Status.ON.value:
                 beeoo_sound.play()
                 item_list[3].status = GridItem.Status.OFF.value
-
 
     # refresh power bar
     if power_current < power_target:
@@ -123,95 +123,132 @@ def refresh(_loop, _data):
 
     # update timer
     current_time = datetime.datetime.now()
-    seconds_until_open = int((portal_opening_time - current_time).total_seconds())
+    seconds_until_open = int(
+        (portal_opening_time - current_time).total_seconds())
     days = seconds_until_open // 86400
     hours = (seconds_until_open - days * 86400) // 3600
     minutes = (seconds_until_open - days * 86400 - hours * 3600) // 60
     seconds = seconds_until_open - days * 86400 - hours * 3600 - minutes * 60
+    # Play warning audio at intervals
     if not power_up_complete:
-        if big_text_countdown.get_text()[0] == '15:00' and not min15_sound_played:
+        if big_text_countdown.get_text(
+        )[0] == '15:00' and not min15_sound_played:
             min15_sound.play()
             min15_sound_played = True
-        elif big_text_countdown.get_text()[0] == '10:00' and not min10_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '10:00' and not min10_sound_played:
             min10_sound.play()
             min10_sound_played = True
-        elif big_text_countdown.get_text()[0] == '05:00' and not min5_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '05:00' and not min5_sound_played:
             min5_sound.play()
             min5_sound_played = True
-        elif big_text_countdown.get_text()[0] == '04:00' and not min4_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '04:00' and not min4_sound_played:
             min4_sound.play()
             min4_sound_played = True
-        elif big_text_countdown.get_text()[0] == '03:00' and not min3_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '03:00' and not min3_sound_played:
             min3_sound.play()
             min3_sound_played = True
-        elif big_text_countdown.get_text()[0] == '02:00' and not min2_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '02:00' and not min2_sound_played:
             min2_sound.play()
             min2_sound_played = True
-        elif big_text_countdown.get_text()[0] == '01:00' and not min1_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '01:00' and not min1_sound_played:
             min1_sound.play()
             min1_sound_played = True
-        elif big_text_countdown.get_text()[0] == '00:30' and not sec30_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '00:30' and not sec30_sound_played:
             sec30_sound.play()
             sec30_sound_played = True
-        elif big_text_countdown.get_text()[0] == '00:05' and not sec5_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '00:05' and not sec5_sound_played:
             sec5_sound.play()
             sec5_sound_played = True
-        elif big_text_countdown.get_text()[0] == '00:04' and not sec4_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '00:04' and not sec4_sound_played:
             sec4_sound.play()
             sec4_sound_played = True
-        elif big_text_countdown.get_text()[0] == '00:03' and not sec3_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '00:03' and not sec3_sound_played:
             sec3_sound.play()
             sec3_sound_played = True
-        elif big_text_countdown.get_text()[0] == '00:02' and not sec2_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '00:02' and not sec2_sound_played:
             sec2_sound.play()
             sec2_sound_played = True
-        elif big_text_countdown.get_text()[0] == '00:01' and not sec1_sound_played:
+        elif big_text_countdown.get_text(
+        )[0] == '00:01' and not sec1_sound_played:
             sec1_sound.play()
             sec1_sound_played = True
-
+        # Less than a minute, start panic routine
         if minutes < 1:
             if (seconds % 2) == 0:
-                countdown_timer_value = [('redflash', str(minutes).zfill(2) + ":" + str(seconds).zfill(2))]
-                main_loop.screen.register_palette_entry('warning', 'light red', 'dark blue')
+                countdown_timer_value = [
+                    ('redflash',
+                     str(minutes).zfill(2) + ":" + str(seconds).zfill(2))
+                ]
+                main_loop.screen.register_palette_entry(
+                    'warning', 'light red', 'dark blue')
                 main_loop.screen.clear()
             else:
-                countdown_timer_value = [('red', str(minutes).zfill(2) + ":" + str(seconds).zfill(2))]
-                main_loop.screen.register_palette_entry('warning', 'dark red', 'dark blue')
+                countdown_timer_value = [
+                    ('red',
+                     str(minutes).zfill(2) + ":" + str(seconds).zfill(2))
+                ]
+                main_loop.screen.register_palette_entry(
+                    'warning', 'dark red', 'dark blue')
                 main_loop.screen.clear()
             big_header_text.set_text("STATUS: CRITICAL")
-            main_loop.screen.register_palette_entry('warning', 'light red', 'dark blue')
+            main_loop.screen.register_palette_entry('warning', 'light red',
+                                                    'dark blue')
         elif minutes < 3:
             big_header_text.set_text("STATUS: CRITICAL")
-            main_loop.screen.register_palette_entry('warning', 'light red', 'dark blue')
-            countdown_timer_value = [('red', str(minutes).zfill(2) + ":" + str(seconds).zfill(2))]
+            main_loop.screen.register_palette_entry('warning', 'light red',
+                                                    'dark blue')
+            countdown_timer_value = [
+                ('red', str(minutes).zfill(2) + ":" + str(seconds).zfill(2))
+            ]
         elif minutes < 5:
-            countdown_timer_value = [('yellow', str(minutes).zfill(2) + ":" + str(seconds).zfill(2))]
+            countdown_timer_value = [
+                ('yellow', str(minutes).zfill(2) + ":" + str(seconds).zfill(2))
+            ]
         else:
-            countdown_timer_value = str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
+            countdown_timer_value = str(minutes).zfill(2) + ":" + str(
+                seconds).zfill(2)
         big_text_countdown.set_text(countdown_timer_value)
 
     # out of time
     if current_time >= portal_opening_time and not power_up_complete:
-        countdown_timer_value = [('red', "00:00")];
+        countdown_timer_value = [('red', "00:00")]
         big_header_text.set_text("STATUS: FAILURE")
         big_text_countdown.set_text(countdown_timer_value)
         main_loop.screen.register_palette_entry('body', 'white', 'dark red')
-        main_loop.screen.register_palette_entry('titlebar', 'white, bold', 'light red')
-        main_loop.screen.register_palette_entry('headers', 'white,bold', 'dark red')
-        main_loop.screen.register_palette_entry('on', 'yellow,bold', 'dark red')
+        main_loop.screen.register_palette_entry('titlebar', 'white, bold',
+                                                'light red')
+        main_loop.screen.register_palette_entry('headers', 'white,bold',
+                                                'dark red')
+        main_loop.screen.register_palette_entry('on', 'yellow,bold',
+                                                'dark red')
         main_loop.screen.register_palette_entry('off', 'light red', 'dark red')
-        main_loop.screen.register_palette_entry('regular', 'light gray', 'dark red')
-        main_loop.screen.register_palette_entry('lightbar', 'light red', 'dark red')
+        main_loop.screen.register_palette_entry('regular', 'light gray',
+                                                'dark red')
+        main_loop.screen.register_palette_entry('lightbar', 'light red',
+                                                'dark red')
         main_loop.screen.register_palette_entry('darkbar', 'black', 'dark red')
-        main_loop.screen.register_palette_entry('normal', 'white', 'dark red', 'standout')
-        main_loop.screen.register_palette_entry('complete', 'white', 'dark red')
+        main_loop.screen.register_palette_entry('normal', 'white', 'dark red',
+                                                'standout')
+        main_loop.screen.register_palette_entry('complete', 'white',
+                                                'dark red')
         main_loop.screen.register_palette_entry('red', 'light red', 'dark red')
-        main_loop.screen.register_palette_entry('warning', 'light red', 'dark red')
-        count_down_text.set_text("PORTAL CONTROL FAILURE!!! PORTAL OPENING!!! EVACUATE IMMEDIATELY! INVASION IMMINENT!")
+        main_loop.screen.register_palette_entry('warning', 'light red',
+                                                'dark red')
+        count_down_text.set_text(
+            "PORTAL CONTROL FAILURE!!! PORTAL OPENING!!! EVACUATE IMMEDIATELY! INVASION IMMINENT!"
+        )
         if not ending_music_played:
-            # error_sound.play(loops=20)
-            # error_sound.fadeout(10000)
-            # sleep(1)
             failure_sound.play()
             ending_music_played = True
         main_loop.screen.clear()
@@ -219,8 +256,11 @@ def refresh(_loop, _data):
         # success!
     if power_up_complete:
         big_header_text.set_text("STATUS: NORMAL")
-        main_loop.screen.register_palette_entry('warning', 'light gray', 'dark blue')
-        count_down_text.set_text("CONGRATULATIONS! PORTAL CONTROL FULLY POWERED UP! PORTAL SHUTDOWN INITIATED!\n")
+        main_loop.screen.register_palette_entry('warning', 'light gray',
+                                                'dark blue')
+        count_down_text.set_text(
+            "CONGRATULATIONS! PORTAL CONTROL FULLY POWERED UP! PORTAL SHUTDOWN INITIATED!\n"
+        )
         if not ending_music_played:
             sleep(1.5)
             victory_sound.play()
@@ -229,29 +269,12 @@ def refresh(_loop, _data):
     main_loop.set_alarm_in(0.01, refresh)
 
 
-# is this a number?
-def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        pass
-    try:
-        import unicodedata
-        unicodedata.numeric(s)
-        return True
-    except (TypeError, ValueError):
-        pass
-    return False
-
-
 # update battery status
 def get_update():
     global power_target
-    updates = [
-        ('headers', u'Socket\t'.expandtabs(6)),
-        ('headers', u'Device \t '.expandtabs(25)),
-        ('headers', u'Status \n'.expandtabs(5))]
+    updates = [('headers', u'Socket\t'.expandtabs(6)),
+               ('headers', u'Device \t '.expandtabs(25)),
+               ('headers', u'Status \n'.expandtabs(5))]
     active_power_cells = 0
     for item in item_list:
         if item.key != '':
@@ -259,7 +282,10 @@ def get_update():
         else:
             append_text(updates, '{} \t '.format(''), tabsize=6)
         append_text(updates, '{} \t '.format(item.label), tabsize=25)
-        append_text(updates, '{} \t '.format(item.status), tabsize=4, text_type=item.status)
+        append_text(updates,
+                    '{} \t '.format(item.status),
+                    tabsize=4,
+                    text_type=item.status)
         append_text(updates, '\n')
         if item.status == GridItem.Status.ON.value:
             active_power_cells = active_power_cells + 1
@@ -283,20 +309,11 @@ def append_text(l, s, tabsize=10, color='body', text_type='default'):
 # handle keyboard input
 def handle_input(key):
     global fanfare_sound, beeoo_sound
-    if key in ('q', 'Q'):
+    if key in ('q', 'Q'):  # use q or Q to quit
         raise urwid.ExitMainLoop()
-    elif key in ('r', 'R'):
+    elif key in ('r', 'R'):  # use r or R to force a reset
         refresh(main_loop, '')
         return
-    #for keyitem in item_list:
-    #    if keyitem.key != '':
-    #        if key == keyitem.key:
-    #            if keyitem.status == GridItem.Status.OFF.value:
-    #                fanfare_sound.play()
-    #                keyitem.status = GridItem.Status.ON.value
-    #            elif keyitem.status == GridItem.Status.ON.value:
-    #                beeoo_sound.play()
-    #                keyitem.status = GridItem.Status.OFF.value
 
 
 # main program
@@ -305,38 +322,61 @@ with open('resources/griditems.json', 'r') as f:
 items = data.get('Griditems')
 item_list = []
 for item in items:
-    item_list.append(GridItem.GridItem(item.get('name'), item.get('label'), item.get('status'), item.get('key')))
+    item_list.append(
+        GridItem.GridItem(item.get('name'), item.get('label'),
+                          item.get('status'), item.get('key')))
 
 # set up screen widgets
-header = urwid.AttrMap(urwid.Text(u' Portal Control Grid', align='center'), 'titlebar')
-menu = urwid.AttrMap(urwid.Text([
-    u'Portal Control Grid copyright 1986 Integrated Computer Systems'
-], align='center'), 'body')
+header = urwid.AttrMap(urwid.Text(u' Portal Control Grid', align='center'),
+                       'titlebar')
+menu = urwid.AttrMap(
+    urwid.Text(
+        [u'Portal Control Grid copyright 1986 Integrated Computer Systems'],
+        align='center'), 'body')
 
 big_header_text = urwid.BigText("STATUS: WARNING", urwid.HalfBlock5x4Font())
 big_header_padding = urwid.Padding(big_header_text, "center", None)
-progress_bar = TimedProgressBar('normal', 'complete', label='Secondary Power',
-                                units='%', done=powerTotal)
-progress_box = UI.LineBox(urwid.AttrMap(progress_bar, 'body'), light_attr='lightbar', dark_attr='darkbar')
-count_down_text = urwid.Text("Time until portal shielding failure:\n\n\n", align='center')
-big_text_countdown = urwid.BigText(str(minutes_until_failure).zfill(2) + ":00", urwid.HalfBlock5x4Font())
+progress_bar = TimedProgressBar('normal',
+                                'complete',
+                                label='Secondary Power',
+                                units='%',
+                                done=powerTotal)
+progress_box = UI.LineBox(urwid.AttrMap(progress_bar, 'body'),
+                          light_attr='lightbar',
+                          dark_attr='darkbar')
+count_down_text = urwid.Text("Time until portal shielding failure:\n\n\n",
+                             align='center')
+big_text_countdown = urwid.BigText(
+    str(minutes_until_failure).zfill(2) + ":00", urwid.HalfBlock5x4Font())
 countdown_padding = urwid.Padding(big_text_countdown, "center", None)
-countdown_pile = UI.LineBox(
-    urwid.Pile([urwid.AttrMap(count_down_text, 'body'), urwid.AttrMap(countdown_padding, 'body')]),
-    light_attr='lightbar', dark_attr='darkbar')
-main_status_text = urwid.Text(u'CRITICAL: ' + str(minutes_until_failure).zfill(2) + ':00 UNTIL DIMENSIONAL PORTAL '
-                                                                                    'SHIELDING FAILURE! RESTORE FULL '
-                                                                                    'POWER TO SHUTDOWN PORTAL!')
-main_status_textbox = UI.LineBox(urwid.AttrMap(main_status_text, 'body'), light_attr='lightbar',
+countdown_pile = UI.LineBox(urwid.Pile([
+    urwid.AttrMap(count_down_text, 'body'),
+    urwid.AttrMap(countdown_padding, 'body')
+]),
+                            light_attr='lightbar',
+                            dark_attr='darkbar')
+main_status_text = urwid.Text(u'CRITICAL: ' +
+                              str(minutes_until_failure).zfill(2) +
+                              ':00 UNTIL DIMENSIONAL PORTAL '
+                              'SHIELDING FAILURE! RESTORE FULL '
+                              'POWER TO SHUTDOWN PORTAL!')
+main_status_textbox = UI.LineBox(urwid.AttrMap(main_status_text, 'body'),
+                                 light_attr='lightbar',
                                  dark_attr='darkbar')
-primary_interface_columns = urwid.Columns([('weight', 2, main_status_textbox), countdown_pile])
-primary_interface_pile = urwid.Pile(
-    [urwid.AttrMap(big_header_padding, 'warning'), urwid.AttrMap(primary_interface_columns, 'body'),
-     urwid.AttrMap(progress_box,
-                   'body')])
-primary_interface_padding = urwid.AttrMap(urwid.Padding(urwid.Filler(urwid.AttrMap(primary_interface_pile, 'body')),
-                                                        left=1, right=1), 'body')
-primary_interface = UI.LineBox(primary_interface_padding, light_attr='lightbar', dark_attr='darkbar')
+primary_interface_columns = urwid.Columns([('weight', 2, main_status_textbox),
+                                           countdown_pile])
+primary_interface_pile = urwid.Pile([
+    urwid.AttrMap(big_header_padding, 'warning'),
+    urwid.AttrMap(primary_interface_columns, 'body'),
+    urwid.AttrMap(progress_box, 'body')
+])
+primary_interface_padding = urwid.AttrMap(
+    urwid.Padding(urwid.Filler(urwid.AttrMap(primary_interface_pile, 'body')),
+                  left=1,
+                  right=1), 'body')
+primary_interface = UI.LineBox(primary_interface_padding,
+                               light_attr='lightbar',
+                               dark_attr='darkbar')
 layout = urwid.Frame(header=header, body=primary_interface, footer=menu)
 
 # boot up sequence
@@ -441,7 +481,8 @@ if boot_up_text:
     floppy_sound.play()
     slowprint("2 of 6 power cells online", 0.3)
     sleep(4)
-    slowprint("Please insert 6 power cells to shut down dimensional portal", 0.3)
+    slowprint("Please insert 6 power cells to shut down dimensional portal",
+              0.3)
     sleep(6)
 os.system('clear')
 
