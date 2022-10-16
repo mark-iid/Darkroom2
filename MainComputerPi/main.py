@@ -18,7 +18,7 @@ powerTotal = 100  # total power needed
 power_target = 0  # power supplied by existing batteries
 minutes_until_failure = 20  # minutes until portal control failure
 portal_opening_time = 0  # time portal will open
-boot_up_text = False  # display portal control boot up text
+boot_up_text = True  # display portal control boot up text
 power_up_complete = False  # state of portal control unit
 battery_processor_device = "/dev/ttyACM0"  # battery processor device
 ending_music_played = False  # has the ending music played yet
@@ -375,10 +375,10 @@ sec3_sound = pygame.mixer.Sound("resources/3sec.wav")
 sec2_sound = pygame.mixer.Sound("resources/2sec.wav")
 sec1_sound = pygame.mixer.Sound("resources/1sec.wav")
 winxp_sound = pygame.mixer.Sound("resources/erro-2.ogg")
-fanfare_sound = pygame.mixer.Sound("resources/batteryplacement.wav")
+fanfare_sound = pygame.mixer.Sound("resources/batteryplacement.ogg")
 # fanfare_sound.set_volume(0.7)
 victory_sound = pygame.mixer.Sound("resources/victory.ogg")
-failure_sound = pygame.mixer.Sound("resources/systemfailure.wav")
+failure_sound = pygame.mixer.Sound("resources/systemfailure.ogg")
 winxp_sound.set_volume(0.8)
 if boot_up_text:
     startup_sound.play()
@@ -443,24 +443,6 @@ if boot_up_text:
     sleep(4)
     slowprint("Please insert 6 power cells to shut down dimensional portal", 0.3)
     sleep(6)
-    os.system('clear')
-    floppy_sound.play()
-    sleep(1)
-slowprint(
-    "Vgl = GetHandl {dat.dt} tempCall {itm.temp} \n Vg2 = GetHandl {dat.itl} tempCall {itm.temp} \nif Link(Vgl,"
-    "Vg2) set Lim(Vgl,Vg2) \n return \nif Link(Vg2,Vgl) set Lim(Vg2,Vgl) \n return \non whte_rbt.obj \n link set "
-    "security (Vgl), perimeter (Vg2) \n limitDat.1 = maxbits (%22) to {limit .04} \n set on limitDat.2 = setzero, "
-    "setfive, 0 {limit .2-var(dzh)} \non fini.obi call link.sst {security, perimeter} set to on \n on fini.obi "
-    "set link.sst {security, perimeter} restore \n on fini.obi delete line rf whte_rbt.obj, fini.obj \nVgl = "
-    "GetHandl {dat.dt} tempCall {itm.temp} \nVg2 = GetHandl {dat.itl} tempCall {itm.temp} \nIimitDat.4 = maxbits "
-    "(%33) to {limit .04} set on \nlimitDat.5 = setzero, setfive, 0 {limit .2-var(szh)}",
-    0.03)
-sleep(1)
-os.system('clear')
-winxp_sound.play()
-with open('resources/ascii-art.txt', 'r') as f:
-    print(f.read())
-sleep(0.1)
 os.system('clear')
 
 # connect to battery processor
