@@ -7,7 +7,7 @@ Dark Room was an escape room project utilizing Raspberry Pi Pico microcontroller
 ## Videos
 
 [![Dark Room 2 Main Control Unit](https://img.youtube.com/vi/k65V7-WZjJ0/0.jpg)](https://www.youtube.com/watch?v=k65V7-WZjJ0)
-[![Dark Room 2 Failure](https://img.youtube.com/vi/XCMcgiAZ-34/0.jpg)](https://
+[![Dark Room 2 Failure](https://img.youtube.com/vi/XCMcgiAZ-34/0.jpg)]
 
 ## Key Components
 
